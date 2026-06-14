@@ -82,8 +82,10 @@
             display: flex;
             gap: 40px;
             margin-top: auto;
-            margin-bottom: 60px;
+            margin-bottom: 80px;
             width: 100%;
+            max-width: 400px;
+            height: 60px;
             justify-content: center;
             position: relative;
         }
@@ -91,14 +93,12 @@
         #btn-no {
             position: absolute;
             z-index: 10;
-            /* Výchozí pozice napravo od středu */
             left: calc(50% + 20px);
             transition: left 0.1s ease-out, top 0.1s ease-out;
         }
 
         #btn-yes {
             position: absolute;
-            /* Výchozí pozice nalevo od středu */
             right: calc(50% + 20px);
         }
 
@@ -230,10 +230,10 @@
             font-size: 18px;
             font-weight: bold;
             max-width: 90%;
-            color: white;             /* Text bude bílý */
-            background-color: #9c0000; /* Pozadí textu bude vínové */
-            padding: 10px;            /* Trochu místa okolo textu, aby to nebylo nalepené */
-            border-radius: 10px;      /* Hezké zaoblení rohů toho pozadí */
+            color: white;
+            background-color: #9c0000;
+            padding: 10px;
+            border-radius: 10px;
         }
 
         .bottom-nav {
@@ -257,12 +257,10 @@
 
     <div id="win2" class="window">
         <h1>Takže ty accually chceš jo 👀</h1>
-        
         <div class="form-group">
             <label>Dobře tak vyber datum:</label>
             <input type="date" id="date-input">
         </div>
-
         <div class="form-group">
             <label>Vyber čas:</label>
             <div class="time-picker">
@@ -271,9 +269,7 @@
                 <select id="minute-select"></select>
             </div>
         </div>
-
         <div id="error-box-win2" class="error-box"></div>
-
         <div class="bottom-nav">
             <button id="btn-confirm" class="btn" style="width: 150px;" onclick="validateDate()">Potvrdit</button>
             <button id="btn-continue-win2" class="btn" style="width: 150px; display: none; margin-top: 15px;" onclick="nextWindow(3)">Pokračovat</button>
@@ -282,7 +278,6 @@
 
     <div id="win3" class="window">
         <h1>Vyber, kotě, co budeme dělat: ❤️</h1>
-        
         <div class="checkbox-container">
             <div class="checkbox-item">
                 <input type="checkbox" id="chk-walk" onchange="updateMenu()">
@@ -297,11 +292,8 @@
                 <label for="chk-random">Random Meetup</label>
             </div>
         </div>
-
         <div id="activity-grid" class="grid-container"></div>
-
         <div id="label-result"></div>
-
         <div class="bottom-nav">
             <button class="btn" style="width: 160px;" onclick="validateFinal()">Pokračovat</button>
         </div>
@@ -313,55 +305,44 @@
     </div>
 
     <script>
-        // =========================================================
-        // === SEM VLOŽ SVŮJ DISCORD WEBHOOK LINK MÍSTO TOHO TEXTU ===
-        // =========================================================
-        // Tenhle zmatený text nikdo na první pohled neodhalí
+        // === SEM VLOŽ SVŮJ DLOUHÝ LINK Z DISCORDU ===
+        // Tady je tvůj bezpečně zašifrovaný Discord odkaz
         const encryptedWebhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwMjExNjU5MjExMTczNy9PT3lwOGYyUEQ5OGxYWFdCUEFtdjdBb1I4RVJYVUR2Qk1JSUdkNjBOUmJsV2xkX2JNTVZxWERLWVNpRktINE8zUzhLUg==";
-        const webhookUrl = atob(encryptedWebhook); // Kód si to sám na pozadí odšifruje
-        // const webhookUrl = "";
+        
+        // Kód si ho sám na pozadí odšifruje pro odeslání
+        const webhookUrl = atob(encryptedWebhook);
 
         let ulozenyDatum = "";
         let ulozenyCas = "";
         let vybranaAktivita = "Jen Procházka";
         let activitySelected = false;
 
-        // --- Logika kontrolovaného uhýbání tlačítka NE ---
         const btnNo = document.getElementById('btn-no');
-        
-        // Nastavení počáteční pozice tlačítka NE, aby nebylo rozhozené
         btnNo.style.left = 'calc(50% + 20px)';
         btnNo.style.top = '0px';
 
-       function moveNoButton(e) {
+        function moveNoButton(e) {
             e.preventDefault();
-            
-            // Zjistíme si přesnou šířku a výšku toho spodního kontejneru s tlačítky
             const container = document.querySelector('.main-buttons');
             const containerWidth = container.offsetWidth;
-            const containerHeight = container.offsetHeight || 100; // Pojistka výšky
+            const containerHeight = container.offsetHeight || 100;
 
             const buttonWidth = 100;
             const buttonHeight = 40;
 
-            // Vypočítáme maximální bezpečné souřadnice uvnitř tohoto boxu
-            // Ubereme 10px jako rezervu (border), aby se tlačítko nedotýkalo úplného kraje
             const maxX = containerWidth - buttonWidth - 10;
             const maxY = containerHeight - buttonHeight - 10;
             const minX = 10;
-            const minY = -200; // Může vyskočit kousek nahoru směrem k GIFu, ale ne výš
+            const minY = -200;
 
-            // Vygenerujeme novou pozici, která je stoprocentně uvnitř těchto hranic
             let newLeft = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
             let newTop = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
 
-            // Natvrdo aplikujeme pozici relativně k tomu boxu, takže nikam neodletí
             btnNo.style.position = 'absolute';
             btnNo.style.left = newLeft + 'px';
             btnNo.style.top = newTop + 'px';
         }
 
-        // Reakce jak na dotyk prstu (mobily), tak na najetí myši (PC simulace)
         btnNo.addEventListener('touchstart', moveNoButton);
         btnNo.addEventListener('mouseover', moveNoButton);
 
@@ -370,7 +351,6 @@
             document.getElementById('win' + winNum).classList.add('active');
         }
 
-        // --- Inicializace výběru času ---
         const hourSelect = document.getElementById('hour-select');
         const minuteSelect = document.getElementById('minute-select');
         
@@ -403,16 +383,8 @@
 
             const selectedDate = new Date(dateInput);
             selectedDate.setHours(0,0,0,0);
-            
             const today = new Date();
             today.setHours(0,0,0,0);
-
-            const now = new Date();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
-
-            const selHour = parseInt(hourSelect.value);
-            const selMinute = parseInt(minuteSelect.value);
 
             errorBox.classList.remove('success');
             errorBox.style.display = "flex";
@@ -422,22 +394,6 @@
                 btnContinue.style.display = "none";
                 return;
             } 
-            
-            if (selectedDate.getTime() === today.getTime()) {
-                const badHour = currentHour + 3;
-                
-                if (selHour < currentHour || (selHour === currentHour && selMinute < currentMinute)) {
-                    errorBox.innerHTML = "Nemůžeš zadat datum,<br> který už byl BBy girl :D";
-                    btnContinue.style.display = "none";
-                    return;
-                }
-                
-                if (selHour <= badHour) {
-                    errorBox.innerHTML = "Babyyyy fakt rád bych došel,<br> ale bohužel nemůžu :\\<br> zkus vybrat něco přijatelnějšího ju?";
-                    btnContinue.style.display = "none";
-                    return;
-                }
-            }
 
             ulozenyDatum = dateInput;
             ulozenyCas = `${hourSelect.value}:${minuteSelect.value}`;
@@ -501,14 +457,7 @@
             btn.onclick = () => {
                 activitySelected = true;
                 vybranaAktivita = codeName;
-
-                if (chkWalk.checked) {
-                    labelResult.innerHTML = `Takže ${codeName}<br> a pak jdeme na romantickou večeři.`;
-                } else if (chkFood.checked) {
-                    labelResult.innerHTML = `Mňam!<br> Jdeme na ${codeName}.<br> už se mi sbíhají sliny. 😋`;
-                } else {
-                    labelResult.innerHTML = `Random Meetup ${codeName}?<br> To bude boží 🤣🤣 už se těším.`;
-                }
+                labelResult.innerHTML = `Vybráno: ${codeName}! Už se těším.`;
             };
 
             activityGrid.appendChild(btn);
@@ -523,7 +472,6 @@
                 labelResult.innerHTML = "Musíš vybrat alespoň nějakou aktivitu!";
                 return;
             }
-
             nextWindow(4);
         }
 
@@ -532,22 +480,21 @@
                 content: `❤️ **NOVÉ RANDE NAPLÁNOVÁNO!** ❤️\n📅 **Datum:** ${ulozenyDatum}\n⏰ **Čas:** ${ulozenyCas}\n🍕 **Aktivita:** ${vybranaAktivita}`
             };
 
-            // Tady se kontroluje, jestli jsi přepsal ten původní text
-            if (webhookUrl && webhookUrl.includes("discord")) {
+            // Kontrola dešifrovaného odkazu
+            if (webhookUrl && webhookUrl.startsWith("https://discord")) {
                 fetch(webhookUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 })
                 .then(() => {
-                    alert("Úspěšně odesláno na Discord! Už se můžeš začít chystat. 😉");
+                    alert("Úspěšně odesláno na Discord! 😉");
                 })
                 .catch((err) => {
-                    console.error("Chyba při odesílání:", err);
-                    alert("Nepodařilo se poslat data, zkontroluj připojení k internetu.");
+                    alert("Chyba při odesílání.");
                 });
             } else {
-                alert("Zpráva nebyla odeslána. Nemáš správně nastavený Webhook link v kódu.");
+                alert("Zpráva nebyla odeslána. Chyba v dešifrování Webhooku.");
             }
         }
     </script>
