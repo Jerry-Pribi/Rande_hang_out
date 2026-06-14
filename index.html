@@ -144,12 +144,12 @@
             font-weight: bold;
         }
 
-        .error-box {
+        .info-box {
             margin-top: 40px;
-            background: black;
-            color: red;
-            font-style: italic;
-            font-size: 15px;
+            background: #7a0000;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
             padding: 15px;
             border-radius: 10px;
             width: 85%;
@@ -157,13 +157,15 @@
             justify-content: center;
             align-items: center;
             min-height: 60px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            line-height: 1.4;
         }
 
-        .error-box.success {
-            color: #9c0000;
+        /* Styl pro případ, že vybere špatný čas (červené písmo v černém boxu tak, jak to bylo v chybě) */
+        .info-box.error-status {
             background: black;
-            font-style: normal;
-            font-weight: bold;
+            color: red;
+            font-style: italic;
         }
 
         .checkbox-container {
@@ -231,7 +233,7 @@
             font-weight: bold;
             max-width: 90%;
             color: white;
-            background-color: #9c0000;
+            background-color: #7a0000;
             padding: 10px;
             border-radius: 10px;
         }
@@ -239,6 +241,9 @@
         .bottom-nav {
             margin-top: auto;
             margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
     </style>
 </head>
@@ -269,10 +274,10 @@
                 <select id="minute-select"></select>
             </div>
         </div>
-        <div id="error-box-win2" class="error-box"></div>
+        <div id="info-box-win2" class="info-box"></div>
         <div class="bottom-nav">
-            <button id="btn-confirm" class="btn" style="width: 150px;" onclick="validateDate()">Potvrdit</button>
-            <button id="btn-continue-win2" class="btn" style="width: 150px; display: none; margin-top: 15px;" onclick="nextWindow(3)">Pokračovat</button>
+            <button id="btn-confirm" class="btn" style="width: 120px;" onclick="validateDate()">Potvrdit</button>
+            <button id="btn-continue-win2" class="btn" style="width: 140px; display: none;" onclick="nextWindow(3)">Pokračovat</button>
         </div>
     </div>
 
@@ -305,11 +310,7 @@
     </div>
 
     <script>
-        // === SEM VLOŽ SVŮJ DLOUHÝ LINK Z DISCORDU ===
-        // Tady je tvůj bezpečně zašifrovaný Discord odkaz
-        const encryptedWebhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwOTEzMDU3MTM2NjYyMS9ud0JCZWtraFZ2VVBpZmllYXAxYzRvQXBsYnhwZGFGRnQ4cnFuZHhQcDB4VzVMQ0xuYUtBd3k5UTQ5UGF2am0zRHkySw==";
-        
-        // Kód si ho sám na pozadí odšifruje pro odeslání
+        const encryptedWebhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwMjExNjU5MjExMTczNy9PT3lwOGYyUEQ5OGxYWFdCUEFtdjdBb1I4RVJYVUR2Qk1JSUdkNjBOUmJsV2xkX2JNTVZxWERLWVNpRktINE8zUzhLUg==";
         const webhookUrl = atob(encryptedWebhook);
 
         let ulozenyDatum = "";
@@ -354,7 +355,7 @@
         const hourSelect = document.getElementById('hour-select');
         const minuteSelect = document.getElementById('minute-select');
         
-        for(let h=7; h<=22; h++) {
+        for(let h=0; h<=23; h++) {
             let opt = document.createElement('option');
             let val = h.toString().padStart(2, '0');
             opt.value = val; opt.textContent = val;
@@ -370,36 +371,50 @@
 
         document.getElementById('date-input').valueAsDate = new Date();
 
+        // CHYTRÁ VALIDACE: Hlídá, jestli rande není v minulosti nebo dřív než za 3 hodiny od teď
         function validateDate() {
             const dateInput = document.getElementById('date-input').value;
-            const errorBox = document.getElementById('error-box-win2');
+            const infoBox = document.getElementById('info-box-win2');
             const btnContinue = document.getElementById('btn-continue-win2');
             
             if(!dateInput) {
-                errorBox.innerHTML = "Musíš vybrat platné datum!";
-                errorBox.style.display = "flex";
+                infoBox.innerHTML = "Musíš vybrat platné datum!";
+                infoBox.classList.add('error-status');
+                infoBox.style.display = "flex";
+                btnContinue.style.display = "none";
                 return;
             }
 
-            const selectedDate = new Date(dateInput);
-            selectedDate.setHours(0,0,0,0);
-            const today = new Date();
-            today.setHours(0,0,0,0);
+            // Vytvoříme objekt zvoleného data a času
+            const selectedDateTime = new Date(`${dateInput}T${hourSelect.value}:${minuteSelect.value}:00`);
+            // Aktuální čas právě teď
+            const now = new Date();
 
-            errorBox.classList.remove('success');
-            errorBox.style.display = "flex";
+            infoBox.style.display = "flex";
 
-            if (selectedDate < today) {
-                errorBox.innerHTML = "Nemůžeš zadat datum,<br> který už byl BBy girl :D";
+            // 1. KONTROLA: Je vybraný čas v minulosti?
+            if (selectedDateTime < now) {
+                infoBox.innerHTML = "Nemůžeš zadat datum nebo čas,<br>který už byl Bby girl :D";
+                infoBox.classList.add('error-status');
                 btnContinue.style.display = "none";
                 return;
-            } 
+            }
 
+            // 2. KONTROLA: Je to méně než za 3 hodiny (3 hodiny = 3 * 60 * 60 * 1000 milisekund)
+            const triHodinyVPrachu = 3 * 60 * 60 * 1000;
+            if (selectedDateTime - now < triHodinyVPrachu) {
+                infoBox.innerHTML = "Nemůžeš vybrat čas dřív než za 3 hodiny,<br>nestíhám se připravit :D";
+                infoBox.classList.add('error-status');
+                btnContinue.style.display = "none";
+                return;
+            }
+
+            // Pokud je všechno správně:
             ulozenyDatum = dateInput;
             ulozenyCas = `${hourSelect.value}:${minuteSelect.value}`;
             
-            errorBox.innerHTML = `Dobře naše rande bude<br> ${ulozenyDatum} v ${ulozenyCas} :D,<br> už se těším`;
-            errorBox.classList.add('success');
+            infoBox.innerHTML = `Dobře, naše rande bude<br>${ulozenyDatum} v ${ulozenyCas} :D,<br>už se těším!`;
+            infoBox.classList.remove('error-status'); // Bude vínový
             btnContinue.style.display = "inline-block";
         }
 
@@ -480,7 +495,6 @@
                 content: `❤️ **NOVÉ RANDE NAPLÁNOVÁNO!** ❤️\n📅 **Datum:** ${ulozenyDatum}\n⏰ **Čas:** ${ulozenyCas}\n🍕 **Aktivita:** ${vybranaAktivita}`
             };
 
-            // Kontrola dešifrovaného odkazu
             if (webhookUrl && webhookUrl.startsWith("https://discord")) {
                 fetch(webhookUrl, {
                     method: 'POST',
@@ -489,6 +503,19 @@
                 })
                 .then(() => {
                     alert("Úspěšně odesláno na Discord! 😉");
+                    
+                    // RESET FORMULÁŘE A NÁVRAT NA START
+                    chkWalk.checked = false; chkFood.checked = false; chkRandom.checked = false;
+                    chkWalk.disabled = false; chkFood.disabled = false;
+                    activityGrid.innerHTML = ""; labelResult.innerHTML = "";
+                    document.getElementById('info-box-win2').style.display = "none";
+                    document.getElementById('btn-continue-win2').style.display = "none";
+                    activitySelected = false; vybranaAktivita = "Jen Procházka";
+                    document.getElementById('date-input').valueAsDate = new Date();
+                    document.getElementById('hour-select').value = "18";
+                    document.getElementById('minute-select').value = "00";
+                    
+                    nextWindow(1);
                 })
                 .catch((err) => {
                     alert("Chyba při odesílání.");
