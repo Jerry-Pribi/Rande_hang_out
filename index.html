@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rande? （づ￣3￣）づ╭❤️～</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Century Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #9c0000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .window {
+            width: 100%;
+            max-width: 600px;
+            height: 100vh;
+            max-height: 700px;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .window.active {
+            display: flex;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            font-style: italic;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .gif-container {
+            border: 5px solid black;
+            background: white;
+            line-height: 0;
+            margin-bottom: 20px;
+            max-width: 90%;
+        }
+
+        .gif-container img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .btn {
+            background-color: white;
+            color: black;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            background-color: #ffb6c1;
+        }
+
+        .main-buttons {
+            display: flex;
+            gap: 40px;
+            margin-top: auto;
+            margin-bottom: 60px;
+            width: 100%;
+            justify-content: center;
+            position: relative;
+        }
+
+        #btn-no {
+            position: absolute;
+            z-index: 10;
+            /* Výchozí pozice napravo od středu */
+            left: calc(50% + 20px);
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+        }
+
+        #btn-yes {
+            position: absolute;
+            /* Výchozí pozice nalevo od středu */
+            right: calc(50% + 20px);
+        }
+
+        .form-group {
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        .form-group label {
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .form-group input[type="date"] {
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            width: 180px;
+            text-align: center;
+        }
+
+        .time-picker {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-picker select {
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            width: 70px;
+        }
+
+        .time-colon {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .error-box {
+            margin-top: 40px;
+            background: black;
+            color: red;
+            font-style: italic;
+            font-size: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            width: 85%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .error-box.success {
+            color: #9c0000;
+            background: black;
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        .checkbox-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: #ffb6c1;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 140px);
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .grid-btn {
+            background-color: white;
+            color: black;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 5px;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .grid-btn img {
+            width: 50px;
+            height: auto;
+        }
+
+        .grid-btn:active {
+            background-color: #ffb6c1;
+        }
+
+        #label-result {
+            margin-top: auto;
+            margin-bottom: 40px;
+            font-size: 18px;
+            font-weight: bold;
+            max-width: 90%;
+            color: white;             /* Text bude bílý */
+            background-color: #9c0000; /* Pozadí textu bude vínové */
+            padding: 10px;            /* Trochu místa okolo textu, aby to nebylo nalepené */
+            border-radius: 10px;      /* Hezké zaoblení rohů toho pozadí */
+        }
+
+        .bottom-nav {
+            margin-top: auto;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="win1" class="window active">
+        <h1>Chceš jít na rande?</h1>
+        <div class="gif-container">
+            <img src="hang-out.gif" alt="Nebylo možné načíst GIF">
+        </div>
+        <div class="main-buttons">
+            <button id="btn-yes" class="btn" style="width: 100px; height: 40px;" onclick="nextWindow(2)">ANO</button>
+            <button id="btn-no" class="btn" style="width: 100px; height: 40px;">NE</button>
+        </div>
+    </div>
+
+    <div id="win2" class="window">
+        <h1>Takže ty accually chceš jo 👀</h1>
+        
+        <div class="form-group">
+            <label>Dobře tak vyber datum:</label>
+            <input type="date" id="date-input">
+        </div>
+
+        <div class="form-group">
+            <label>Vyber čas:</label>
+            <div class="time-picker">
+                <select id="hour-select"></select>
+                <div class="time-colon">:</div>
+                <select id="minute-select"></select>
+            </div>
+        </div>
+
+        <div id="error-box-win2" class="error-box"></div>
+
+        <div class="bottom-nav">
+            <button id="btn-confirm" class="btn" style="width: 150px;" onclick="validateDate()">Potvrdit</button>
+            <button id="btn-continue-win2" class="btn" style="width: 150px; display: none; margin-top: 15px;" onclick="nextWindow(3)">Pokračovat</button>
+        </div>
+    </div>
+
+    <div id="win3" class="window">
+        <h1>Vyber, kotě, co budeme dělat: ❤️</h1>
+        
+        <div class="checkbox-container">
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-walk" onchange="updateMenu()">
+                <label for="chk-walk">Procházka</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-food" onchange="updateMenu()">
+                <label for="chk-food">Jídlo</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="chk-random" onchange="updateMenu()">
+                <label for="chk-random">Random Meetup</label>
+            </div>
+        </div>
+
+        <div id="activity-grid" class="grid-container"></div>
+
+        <div id="label-result"></div>
+
+        <div class="bottom-nav">
+            <button class="btn" style="width: 160px;" onclick="validateFinal()">Pokračovat</button>
+        </div>
+    </div>
+
+    <div id="win4" class="window">
+        <h1 style="font-size: 28px; margin-top: 100px; line-height: 1.5;">Máme naplánováno! <br><br> Už se nemůžu dočkat, bby :3.</h1>
+        <button class="btn" style="width: 200px; height: 50px; margin-top: 60px;" onclick="sendData()">Poslat a ukončit</button>
+    </div>
+
+    <script>
+        // =========================================================
+        // === SEM VLOŽ SVŮJ DISCORD WEBHOOK LINK MÍSTO TOHO TEXTU ===
+        // =========================================================
+        const webhookUrl = "SEM_VLOZ_SVOJ_DISCORD_WEBHOOK";
+
+        let ulozenyDatum = "";
+        let ulozenyCas = "";
+        let vybranaAktivita = "Jen Procházka";
+        let activitySelected = false;
+
+        // --- Logika kontrolovaného uhýbání tlačítka NE ---
+        const btnNo = document.getElementById('btn-no');
+        
+        // Nastavení počáteční pozice tlačítka NE, aby nebylo rozhozené
+        btnNo.style.left = 'calc(50% + 20px)';
+        btnNo.style.top = '0px';
+
+       function moveNoButton(e) {
+            e.preventDefault();
+            
+            // Zjistíme si přesnou šířku a výšku toho spodního kontejneru s tlačítky
+            const container = document.querySelector('.main-buttons');
+            const containerWidth = container.offsetWidth;
+            const containerHeight = container.offsetHeight || 100; // Pojistka výšky
+
+            const buttonWidth = 100;
+            const buttonHeight = 40;
+
+            // Vypočítáme maximální bezpečné souřadnice uvnitř tohoto boxu
+            // Ubereme 10px jako rezervu (border), aby se tlačítko nedotýkalo úplného kraje
+            const maxX = containerWidth - buttonWidth - 10;
+            const maxY = containerHeight - buttonHeight - 10;
+            const minX = 10;
+            const minY = -200; // Může vyskočit kousek nahoru směrem k GIFu, ale ne výš
+
+            // Vygenerujeme novou pozici, která je stoprocentně uvnitř těchto hranic
+            let newLeft = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+            let newTop = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+            // Natvrdo aplikujeme pozici relativně k tomu boxu, takže nikam neodletí
+            btnNo.style.position = 'absolute';
+            btnNo.style.left = newLeft + 'px';
+            btnNo.style.top = newTop + 'px';
+        }
+
+        // Reakce jak na dotyk prstu (mobily), tak na najetí myši (PC simulace)
+        btnNo.addEventListener('touchstart', moveNoButton);
+        btnNo.addEventListener('mouseover', moveNoButton);
+
+        function nextWindow(winNum) {
+            document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+            document.getElementById('win' + winNum).classList.add('active');
+        }
+
+        // --- Inicializace výběru času ---
+        const hourSelect = document.getElementById('hour-select');
+        const minuteSelect = document.getElementById('minute-select');
+        
+        for(let h=7; h<=22; h++) {
+            let opt = document.createElement('option');
+            let val = h.toString().padStart(2, '0');
+            opt.value = val; opt.textContent = val;
+            if(val === "18") opt.selected = true;
+            hourSelect.appendChild(opt);
+        }
+        for(let m=0; m<60; m+=5) {
+            let opt = document.createElement('option');
+            let val = m.toString().padStart(2, '0');
+            opt.value = val; opt.textContent = val;
+            minuteSelect.appendChild(opt);
+        }
+
+        document.getElementById('date-input').valueAsDate = new Date();
+
+        function validateDate() {
+            const dateInput = document.getElementById('date-input').value;
+            const errorBox = document.getElementById('error-box-win2');
+            const btnContinue = document.getElementById('btn-continue-win2');
+            
+            if(!dateInput) {
+                errorBox.innerHTML = "Musíš vybrat platné datum!";
+                errorBox.style.display = "flex";
+                return;
+            }
+
+            const selectedDate = new Date(dateInput);
+            selectedDate.setHours(0,0,0,0);
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            const selHour = parseInt(hourSelect.value);
+            const selMinute = parseInt(minuteSelect.value);
+
+            errorBox.classList.remove('success');
+            errorBox.style.display = "flex";
+
+            if (selectedDate < today) {
+                errorBox.innerHTML = "Nemůžeš zadat datum,<br> který už byl BBy girl :D";
+                btnContinue.style.display = "none";
+                return;
+            } 
+            
+            if (selectedDate.getTime() === today.getTime()) {
+                const badHour = currentHour + 3;
+                
+                if (selHour < currentHour || (selHour === currentHour && selMinute < currentMinute)) {
+                    errorBox.innerHTML = "Nemůžeš zadat datum,<br> který už byl BBy girl :D";
+                    btnContinue.style.display = "none";
+                    return;
+                }
+                
+                if (selHour <= badHour) {
+                    errorBox.innerHTML = "Babyyyy fakt rád bych došel,<br> ale bohužel nemůžu :\\<br> zkus vybrat něco přijatelnějšího ju?";
+                    btnContinue.style.display = "none";
+                    return;
+                }
+            }
+
+            ulozenyDatum = dateInput;
+            ulozenyCas = `${hourSelect.value}:${minuteSelect.value}`;
+            
+            errorBox.innerHTML = `Dobře naše rande bude<br> ${ulozenyDatum} v ${ulozenyCas} :D,<br> už se těším`;
+            errorBox.classList.add('success');
+            btnContinue.style.display = "inline-block";
+        }
+
+        const chkWalk = document.getElementById('chk-walk');
+        const chkFood = document.getElementById('chk-food');
+        const chkRandom = document.getElementById('chk-random');
+        const activityGrid = document.getElementById('activity-grid');
+        const labelResult = document.getElementById('label-result');
+
+        function updateMenu() {
+            activitySelected = false;
+            activityGrid.innerHTML = "";
+            labelResult.innerHTML = "";
+
+            if (chkRandom.checked) {
+                chkWalk.checked = false;
+                chkFood.checked = false;
+                chkWalk.disabled = true;
+                chkFood.disabled = true;
+
+                createGridButton("Kino 🎬", "Kino");
+                createGridButton("Divadlo 🎭", "Divadlo");
+                createGridButton("Club 🍻", "Club");
+            } else {
+                chkWalk.disabled = false;
+                chkFood.disabled = false;
+
+                if (chkFood.checked) {
+                    createGridButton("Sushi 🍣", "Sushi", "sushi.png");
+                    createGridButton("Fast Food 🍔", "Fast Food", "fast_food.png");
+                    createGridButton("Kebab 🌯", "Kebab", "kebab.png");
+                    createGridButton("Restaurace 🥂", "hezkou romantickou restauraci");
+                } else if (chkWalk.checked) {
+                    labelResult.innerHTML = "Procházka zní super!<br> Ať už půjdeme kamkoliv Baby &lt;3 :D";
+                    vybranaAktivita = "Procházka";
+                }
+            }
+        }
+
+        function createGridButton(text, codeName, imgSrc = null) {
+            const btn = document.createElement('button');
+            btn.className = 'grid-btn';
+            
+            if (imgSrc) {
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = text;
+                btn.appendChild(img);
+            }
+            
+            const span = document.createElement('span');
+            span.textContent = text;
+            btn.appendChild(span);
+
+            btn.onclick = () => {
+                activitySelected = true;
+                vybranaAktivita = codeName;
+
+                if (chkWalk.checked) {
+                    labelResult.innerHTML = `Takže ${codeName}<br> a pak jdeme na romantickou večeři.`;
+                } else if (chkFood.checked) {
+                    labelResult.innerHTML = `Mňam!<br> Jdeme na ${codeName}.<br> už se mi sbíhají sliny. 😋`;
+                } else {
+                    labelResult.innerHTML = `Random Meetup ${codeName}?<br> To bude boží 🤣🤣 už se těším.`;
+                }
+            };
+
+            activityGrid.appendChild(btn);
+        }
+
+        function validateFinal() {
+            if (!chkRandom.checked && !chkWalk.checked && !chkFood.checked) {
+                labelResult.innerHTML = "Musíš vybrat alespoň jednu věc";
+                return;
+            }
+            if ((chkFood.checked || chkRandom.checked) && !activitySelected) {
+                labelResult.innerHTML = "Musíš vybrat alespoň nějakou aktivitu!";
+                return;
+            }
+
+            nextWindow(4);
+        }
+
+        function sendData() {
+            const payload = {
+                content: `❤️ **NOVÉ RANDE NAPLÁNOVÁNO!** ❤️\n📅 **Datum:** ${ulozenyDatum}\n⏰ **Čas:** ${ulozenyCas}\n🍕 **Aktivita:** ${vybranaAktivita}`
+            };
+
+            // Tady se kontroluje, jestli jsi přepsal ten původní text
+            if (webhookUrl && webhookUrl.includes("discord")) {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(() => {
+                    alert("Úspěšně odesláno na Discord! Už se můžeš začít chystat. 😉");
+                })
+                .catch((err) => {
+                    console.error("Chyba při odesílání:", err);
+                    alert("Nepodařilo se poslat data, zkontroluj připojení k internetu.");
+                });
+            } else {
+                alert("Zpráva nebyla odeslána. Nemáš správně nastavený Webhook link v kódu.");
+            }
+        }
+    </script>
+</body>
+</html>
