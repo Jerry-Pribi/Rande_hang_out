@@ -316,7 +316,10 @@
         // =========================================================
         // === SEM VLOŽ SVŮJ DISCORD WEBHOOK LINK MÍSTO TOHO TEXTU ===
         // =========================================================
-        const webhookUrl = "SEM_VLOZ_SVOJ_DISCORD_WEBHOOK";
+        // Tenhle zmatený text nikdo na první pohled neodhalí
+        const encryptedWebhook = "Y29ydXNjYXRpbmctcHVwcHktMDc5MWM0Lm5ldGxpZnkuYXBw";
+        const webhookUrl = atob(encryptedWebhook); // Kód si to sám na pozadí odšifruje
+        // const webhookUrl = "";
 
         let ulozenyDatum = "";
         let ulozenyCas = "";
