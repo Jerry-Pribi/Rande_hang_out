@@ -48,6 +48,40 @@
             margin-bottom: 15px;
         }
 
+        /* Styl pro Login okno */
+        .login-group {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 250px;
+            text-align: left;
+        }
+
+        .login-group label {
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .login-group input {
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            color: black;
+            background-color: white;
+            margin-bottom: 15px;
+        }
+
+        #login-error {
+            color: #ffb6c1;
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 10px;
+            min-height: 20px;
+        }
+
         .gif-container {
             border: 5px solid black;
             background: white;
@@ -146,7 +180,6 @@
 
         .info-box {
             margin-top: 40px;
-            background: #7a0000;
             color: white;
             font-weight: bold;
             font-size: 16px;
@@ -156,15 +189,12 @@
             display: none;
             justify-content: center;
             align-items: center;
-            min-height: 60px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            line-height: 1.4;
+            min-height: 80px;
+            line-height: 1.5;
         }
 
-        /* Styl pro případ, že vybere špatný čas (červené písmo v černém boxu tak, jak to bylo v chybě) */
         .info-box.error-status {
-            background: black;
-            color: red;
+            color: #ffb6c1;
             font-style: italic;
         }
 
@@ -233,7 +263,6 @@
             font-weight: bold;
             max-width: 90%;
             color: white;
-            background-color: #7a0000;
             padding: 10px;
             border-radius: 10px;
         }
@@ -249,7 +278,23 @@
 </head>
 <body>
 
-    <div id="win1" class="window active">
+    <div id="win0" class="window active">
+        <h1 style="margin-top: 100px; margin-bottom: 30px;">Ahoj kotě, nejdřív se přihlas: ❤️</h1>
+        
+        <div class="login-group">
+            <label for="username">Uživatelské jméno:</label>
+            <input type="text" id="username" autocomplete="off">
+            
+            <label for="password">Heslo:</label>
+            <input type="password" id="password">
+        </div>
+        
+        <div id="login-error"></div>
+        
+        <button class="btn" style="width: 160px; margin-top: 20px;" onclick="handleLogin()">Přihlásit se</button>
+    </div>
+
+    <div id="win1" class="window">
         <h1>Chceš jít na rande?</h1>
         <div class="gif-container">
             <img src="hang-out.gif" alt="Nebylo možné načíst GIF">
@@ -310,14 +355,56 @@
     </div>
 
     <script>
-        const encryptedWebhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwMjExNjU5MjExMTczNy9PT3lwOGYyUEQ5OGxYWFdCUEFtdjdBb1I4RVJYVUR2Qk1JSUdkNjBOUmJsV2xkX2JNTVZxWERLWVNpRktINE8zUzhLUg==";
-        const webhookUrl = atob(encryptedWebhook);
+        // --- DATA UŽIVATELŮ A JEJICH WEBHUOKŮ ---
+        const UZIVATELE = {
+            "bby": {
+                "heslo": "123",
+                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwMjExNjU5MjExMTczNy9PT3lwOGYyUEQ5OGxYWFdCUEFtdjdBb1I4RVJYVUR2Qk1JSUdkNjBOUmJsV2xkX2JNTVZxWERLWVNpRktINE8zUzhLUg=="
+            },
+            "kamos": {
+                "heslo": "heslo456",
+                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNjMzMDY2NDIzOTAzODUyNS9tVElWNURpU3ZSMUJNX0YwZ1ZyWFR3QVNTOGE2d0lYcTBtOEs5c0FWVlZSSy1naUZMVGR5UG5nV0lySGhzdjRDM0lPVw=="
+            }
+        };
 
+        let aktivniUzivatel = null;
         let ulozenyDatum = "";
         let ulozenyCas = "";
         let vybranaAktivita = "Jen Procházka";
         let activitySelected = false;
 
+        function poslatZpravuDiscord(text) {
+            if (!aktivniUzivatel || !UZIVATELE[aktivniUzivatel]) return;
+            
+            const encryptedUrl = UZIVATELE[aktivniUzivatel]["webhook"];
+            const webhookUrl = atob(encryptedUrl);
+
+            if (webhookUrl && webhookUrl.startsWith("https://discord")) {
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: text })
+                }).catch(err => console.error("Chyba odesílání:", err));
+            }
+        }
+
+        function handleLogin() {
+            const userIn = document.getElementById("username").value.trim();
+            const passIn = document.getElementById("password").value.trim();
+            const errorLabel = document.getElementById("login-error");
+
+            if (UZIVATELE[userIn] && UZIVATELE[userIn]["heslo"] === passIn) {
+                aktivniUzivatel = userIn;
+                errorLabel.innerHTML = "";
+                
+                poslatZpravuDiscord(`⚠️ **Uživatel \`${aktivniUzivatel}\` se právě přihlásil do aplikace! 👀**`);
+                nextWindow(1);
+            } else {
+                errorLabel.innerHTML = "Špatné jméno nebo heslo, zkus to znova bby! 😭";
+            }
+        }
+
+        // Pohyb tlačítka NE
         const btnNo = document.getElementById('btn-no');
         btnNo.style.left = 'calc(50% + 20px)';
         btnNo.style.top = '0px';
@@ -352,10 +439,11 @@
             document.getElementById('win' + winNum).classList.add('active');
         }
 
+        // Generování času
         const hourSelect = document.getElementById('hour-select');
         const minuteSelect = document.getElementById('minute-select');
         
-        for(let h=0; h<=23; h++) {
+        for(let h=7; h<=22; h++) {
             let opt = document.createElement('option');
             let val = h.toString().padStart(2, '0');
             opt.value = val; opt.textContent = val;
@@ -369,9 +457,13 @@
             minuteSelect.appendChild(opt);
         }
 
-        document.getElementById('date-input').valueAsDate = new Date();
+        // Nastavení výchozího dnešního data do kalendáře
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        document.getElementById('date-input').value = `${yyyy}-${mm}-${dd}`;
 
-        // CHYTRÁ VALIDACE: Hlídá, jestli rande není v minulosti nebo dřív než za 3 hodiny od teď
         function validateDate() {
             const dateInput = document.getElementById('date-input').value;
             const infoBox = document.getElementById('info-box-win2');
@@ -385,36 +477,41 @@
                 return;
             }
 
-            // Vytvoříme objekt zvoleného data a času
+            // Sloučení data a času pro validaci
             const selectedDateTime = new Date(`${dateInput}T${hourSelect.value}:${minuteSelect.value}:00`);
-            // Aktuální čas právě teď
             const now = new Date();
 
             infoBox.style.display = "flex";
 
-            // 1. KONTROLA: Je vybraný čas v minulosti?
-            if (selectedDateTime < now) {
-                infoBox.innerHTML = "Nemůžeš zadat datum nebo čas,<br>který už byl Bby girl :D";
+            // Očištění obou dat od času pro přesné porovnání dnů
+            const selectedDateOnly = new Date(dateInput);
+            selectedDateOnly.setHours(0,0,0,0);
+            const todayDateOnly = new Date();
+            todayDateOnly.setHours(0,0,0,0);
+
+            if (selectedDateOnly < todayDateOnly) {
+                infoBox.innerHTML = "Nemůžeš zadat datum,<br>který už byl BBy girl :D";
                 infoBox.classList.add('error-status');
                 btnContinue.style.display = "none";
                 return;
             }
 
-            // 2. KONTROLA: Je to méně než za 3 hodiny (3 hodiny = 3 * 60 * 60 * 1000 milisekund)
-            const triHodinyVPrachu = 3 * 60 * 60 * 1000;
-            if (selectedDateTime - now < triHodinyVPrachu) {
-                infoBox.innerHTML = "Nemůžeš vybrat čas dřív než za 3 hodiny,<br>nestíhám se připravit :D";
-                infoBox.classList.add('error-status');
-                btnContinue.style.display = "none";
-                return;
+            // Validace 3 hodiny dopředu, pokud plánuje na dnešek
+            if (selectedDateOnly.getTime() === todayDateOnly.getTime()) {
+                const triHodinyVPrachu = 3 * 60 * 60 * 1000;
+                if (selectedDateTime - now <= triHodinyVPrachu) {
+                    infoBox.innerHTML = "Babyyyy fakt rád bych došel,<br>ale bohužel nemůžu :\\<br>zkus vybrat něco přijatelnějšího ju?";
+                    infoBox.classList.add('error-status');
+                    btnContinue.style.display = "none";
+                    return;
+                }
             }
 
-            // Pokud je všechno správně:
             ulozenyDatum = dateInput;
             ulozenyCas = `${hourSelect.value}:${minuteSelect.value}`;
             
-            infoBox.innerHTML = `Dobře, naše rande bude<br>${ulozenyDatum} v ${ulozenyCas} :D,<br>už se těším!`;
-            infoBox.classList.remove('error-status'); // Bude vínový
+            infoBox.innerHTML = `Dobře naše rande bude<br>${ulozenyDatum} v ${ulozenyCas} :D,<br>už se těším`;
+            infoBox.classList.remove('error-status');
             btnContinue.style.display = "inline-block";
         }
 
@@ -472,7 +569,13 @@
             btn.onclick = () => {
                 activitySelected = true;
                 vybranaAktivita = codeName;
-                labelResult.innerHTML = `Vybráno: ${codeName}! Už se těším.`;
+                if (chkWalk.checked) {
+                    labelResult.innerHTML = `Takže ${codeName}<br>a pak jdeme na romantickou večeři.`;
+                } else if (chkFood.checked) {
+                    labelResult.innerHTML = `Mňam!<br>Jdeme na ${codeName}.<br>už se mi sbíhají sliny. 😋`;
+                } else {
+                    labelResult.innerHTML = `Random Meetup ${codeName}?<br>To bude boží 🤣🤣 už se těším.`;
+                }
             };
 
             activityGrid.appendChild(btn);
@@ -491,38 +594,31 @@
         }
 
         function sendData() {
-            const payload = {
-                content: `❤️ **NOVÉ RANDE NAPLÁNOVÁNO!** ❤️\n📅 **Datum:** ${ulozenyDatum}\n⏰ **Čas:** ${ulozenyCas}\n🍕 **Aktivita:** ${vybranaAktivita}`
-            };
-
-            if (webhookUrl && webhookUrl.startsWith("https://discord")) {
-                fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(() => {
-                    alert("Úspěšně odesláno na Discord! 😉");
-                    
-                    // RESET FORMULÁŘE A NÁVRAT NA START
-                    chkWalk.checked = false; chkFood.checked = false; chkRandom.checked = false;
-                    chkWalk.disabled = false; chkFood.disabled = false;
-                    activityGrid.innerHTML = ""; labelResult.innerHTML = "";
-                    document.getElementById('info-box-win2').style.display = "none";
-                    document.getElementById('btn-continue-win2').style.display = "none";
-                    activitySelected = false; vybranaAktivita = "Jen Procházka";
-                    document.getElementById('date-input').valueAsDate = new Date();
-                    document.getElementById('hour-select').value = "18";
-                    document.getElementById('minute-select').value = "00";
-                    
-                    nextWindow(1);
-                })
-                .catch((err) => {
-                    alert("Chyba při odesílání.");
-                });
-            } else {
-                alert("Zpráva nebyla odeslána. Chyba v dešifrování Webhooku.");
-            }
+            poslatZpravuDiscord(`❤️ **NOVÉ RANDE NAPLÁNOVÁNO UŽIVATELEM \`${aktivniUzivatel}\`!** ❤️\n📅 **Datum:** ${ulozenyDatum}\n⏰ **Čas:** ${ulozenyCas}\n🍕 **Aktivita:** ${vybranaAktivita}`);
+            
+            alert("Úspěšně odesláno na Discord! 😉");
+            
+            // Reset stránky na začátek
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            chkWalk.checked = false; chkFood.checked = false; chkRandom.checked = false;
+            chkWalk.disabled = false; chkFood.disabled = false;
+            activityGrid.innerHTML = ""; labelResult.innerHTML = "";
+            document.getElementById('info-box-win2').style.display = "none";
+            document.getElementById('btn-continue-win2').style.display = "none";
+            activitySelected = false; vybranaAktivita = "Jen Procházka";
+            
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById('date-input').value = `${yyyy}-${mm}-${dd}`;
+            
+            document.getElementById('hour-select').value = "18";
+            document.getElementById('minute-select').value = "00";
+            aktivniUzivatel = null;
+            
+            nextWindow(0);
         }
     </script>
 </body>
