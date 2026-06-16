@@ -355,15 +355,15 @@
     </div>
 
     <script>
-        // --- DATA UŽIVATELŮ A JEJICH WEBHUOKŮ ---
+        // --- 100% SPRÁVNÁ A FINÁLNÍ DATA WEBHUOKŮ ---
         const UZIVATELE = {
             "bby": {
                 "heslo": "123",
-                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwMjExNjU5MjExMTczNy9PT3lwOGYyUEQ5OGxYWFdCUEFtdjdBb1I4RVJYVUR2Qk1JSUdkNjBOUmJsV2xkX2JNTVZxWERLWVNpRktINE8zUzhLUg=="
+                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNTgwOTEzMDU3MTM2NjYyMS9ud0JCZWtraFZ2VVBpZmllYXAxYzRvQXBsYnhwZGFGRnQ4cnFuZHhQcDB4VzVMQ0xuYUtBd3k5UTQ5UGF2am0zRHkySw=="
             },
             "kamos": {
                 "heslo": "heslo456",
-                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNjMzMDY2NDIzOTAzODUyNS9tVElWNURpU3ZSMUJNX0YwZ1ZyWFR3QVNTOGE2d0lYcTBtOEs5c0FWVlZSSy1naUZMVGR5UG5nV0lySGhzdjRDM0lPVw=="
+                "webhook": "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTUxNjMzMDY2NDIzOTAzODUyNS9tVElWNURpU3ZSMUJNX0YwZ1ZyWFR3QVNTOGE2d0lYcTBtOEs5c0FWVlZSSy1naUZMVGR5UG5nV0lySGhzdjREM0lPVw=="
             }
         };
 
@@ -373,7 +373,7 @@
         let vybranaAktivita = "Jen Procházka";
         let activitySelected = false;
 
-        // OPRAVENÁ FUNKCE PRO OBCHÁZENÍ CORS OCHRANY DISCORDU
+        // KOREKTNÍ POST FUNKCE S JSON FORMÁTEM, KTERÝ DISCORD VYŽADUJE
         function poslatZpravuDiscord(text) {
             if (!aktivniUzivatel || !UZIVATELE[aktivniUzivatel]) return;
             
@@ -381,26 +381,17 @@
             const webhookUrl = atob(encryptedUrl);
 
             if (webhookUrl && webhookUrl.startsWith("https://discord")) {
-                // Posíláme čistý JSON, což je pro Discord Webhook ideální formát
-                const payload = {
-                    content: text
-                };
-
                 fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json' // Důležité: řekneme Discordu, že posíláme JSON
+                        'Content-Type': 'application/json' // Discord striktně vyžaduje tuto hlavičku pro JSON payloady!
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ content: text })
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        console.error("Discord vrátil chybu:", response.status);
-                    } else {
-                        console.log("Zpráva úspěšně odeslána na Discord!");
-                    }
+                .then(res => {
+                    if(!res.ok) console.error("Discord vrátil chybu statusu:", res.status);
                 })
-                .catch(err => console.error("Chyba sítě při odesílání:", err));
+                .catch(err => console.error("Chyba spojení:", err));
             }
         }
 
